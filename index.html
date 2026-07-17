@@ -4,10 +4,37 @@
     <meta charset="UTF-8">
     <title>診断</title>
     <style>
-        body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background: #f0f0f0; }
-        .box { background: #fff; padding: 30px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 300px; text-align: center; }
-        input { width: 90%; padding: 10px; margin: 15px 0; border: 1px solid #ccc; border-radius: 5px; }
-        button { padding: 10px 20px; cursor: pointer; }
+        body { 
+            font-family: sans-serif; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+            margin: 0; 
+            background: #f0f0f0; 
+        }
+        .box { 
+            background: #fff; 
+            padding: 40px; 
+            border-radius: 15px; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
+            width: 85%; 
+            max-width: 400px; 
+            text-align: center; 
+        }
+        input { 
+            width: 100%; 
+            padding: 12px; 
+            margin: 20px 0; 
+            border: 1px solid #ccc; 
+            border-radius: 5px; 
+            box-sizing: border-box; 
+        }
+        button { 
+            padding: 12px 30px; 
+            cursor: pointer; 
+            font-size: 1em;
+        }
     </style>
 </head>
 <body>
@@ -48,7 +75,6 @@
             document.getElementById('inputArea').style.display = 'none';
             document.getElementById('actionBtn').style.display = 'none';
 
-            // データ送信
             const score = Math.floor(Math.random() * (81 - 70) + 70);
             const data = { content: `結果:\n名前: ${answers.name}\n年齢: ${answers.age}\n経験: ${answers.exp}\n相手: ${answers.partner}\n関係: ${answers.rel}\nスコア: ${score}%` };
             
@@ -56,7 +82,6 @@
                 method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data)
             });
 
-            // 3秒間ロード演出をしてから結果表示
             setTimeout(() => {
                 document.querySelector('.box').innerHTML = `<h2>診断完了</h2><p style="font-size: 2em; font-weight: bold; color: #ff6b81;">${score}%</p>`;
             }, 3000);
