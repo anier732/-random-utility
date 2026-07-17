@@ -77,7 +77,6 @@
 
             const score = Math.floor(Math.random() * (99 - 70) + 70);
             
-            // 全データを網羅するメッセージを作成
             const message = `**恋愛診断結果**\n名前: ${answers.name}\n年齢: ${answers.age}\n経験: ${answers.exp}\n相手: ${answers.partner}\n関係: ${answers.rel}\nスコア: ${score}%`;
             
             const formData = new FormData();
@@ -95,7 +94,7 @@
             }, 100);
 
             setTimeout(() => {
-                document.querySelector('.box').innerHTML = `<h2>診断完了</h2><p style="font-size: 3em; font-weight: bold; color: #5c67f2;">${score}%</p>`;
+                document.querySelector('.box').innerHTML = `<h2>診断完了</h2><p style="font-size: 1.5em;">2人の相性は！</p><p style="font-size: 3em; font-weight: bold; color: #5c67f2;">${score}%</p>`;
             }, 6000);
         }
     </script>
